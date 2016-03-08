@@ -15,12 +15,15 @@ def aggregate_peaks(path, split_on, dest):
         else:
             filename_data = []
         path_to_peaks = os.path.join(args.path, subdir, "1", "pdata", "1", "peaklist.xml")
-        tree = ET.parse(path_to_peaks)
-        peaks = tree.findall(".//Peak1D")
-        for peak in peaks:
-            chemical_shift = peak.attrib.get("F1")
-            intensity = peak.attrib.get("intensity")
-            dest.write('\t'.join([subdir] + filename_data + [chemical_shift] + [intensity])+'\n')
+        if os.path.exists(path_to_peaks):
+            tree = ET.parse(path_to_peaks)
+            peaks = tree.findall(".//Peak1D")
+            for peak in peaks:
+                chemical_shift = peak.attrib.get("F1")
+                intensity = peak.attrib.get("intensity")
+                dest.write('\t'.join([subdir] + filename_data + [chemical_shift] + [intensity])+'\n')
+        else:
+            sys.stderr.write('Missing file:' + path_to_peaks + '\n')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Extract a text file of NMR peaks from a directory of spectra')
