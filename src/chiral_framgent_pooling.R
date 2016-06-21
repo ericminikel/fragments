@@ -87,7 +87,7 @@ cat(sepsmiles(frags$smiles[frags$reshuffled_cluster==43]))
 
 # write out results
 output = frags[with(frags, order(reshuffled_cluster)),]
-plate_layout = data.frame(well_name=paste(rep(LETTERS[1:8],each=12),rep(1:12,8),sep=''),well_number=0:95)
+plate_layout = data.frame(well_name=paste(rep(LETTERS[1:8],each=12),formatC(rep(1:12,8),flag='0',width=2),sep=''),well_number=0:95)
 output$well_name = plate_layout$well_name[match(output$reshuffled_cluster,plate_layout$well_number)]
 output = output[,c("well_name","broad_id","smiles","expected_mass__desalted_","chemist_or_library")]
 write.table(output,'chiral_fragment_pools.tsv',sep='\t',row.names=F,col.names=T,quote=F)
@@ -102,3 +102,14 @@ cm_table$smiles = output$smiles[match(cm_table$broad_sample,output$broad_id)]
 sum(duplicated(cm_table$smiles))
 
 write.table(cm_table,'cm_files/pool_list_for_cm.tsv',sep='\t',row.names=F,col.names=T,quote=F)
+
+### ------
+
+# source plate is now made, creating file for Echo plate mapping into assay-ready plate
+plate_map = read.table('cm_files/S-C-7215-01-CMP-001.txt',sep='\t',header=T)
+plate_map$arp_well = cm_table$arp_well[match(plate_map$broad_sample,cm_table$broad_sample)]
+echo = data.frame(source_plate_barcode = plate_map$plate_map_name,
+                  source_plate_well = plate_map$well_position,
+                  destination_plate_numer = rep(1,384),
+                  destination_plate_well = plate_map$arp_well)
+write.table(echo,'cm_files/echo_file_for_cm.tsv',sep='\t',row.names=F,col.names=T,quote=F)
